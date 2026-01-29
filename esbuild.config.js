@@ -24,15 +24,6 @@ const jsOptions = {
     logLevel: isDev ? 'info' : 'error',
 };
 
-const cssOptions = {
-    entryPoints: [path.resolve(__dirname, "styleImport.js")],
-    bundle: true,
-    minify: true,
-    sourcemap: isDev,
-    outdir: path.resolve(__dirname, 'dist/css'),
-    entryNames: 'style',
-}
-
 const copyAssets = async () => {
     fse.ensureDirSync(path.resolve(__dirname, 'dist/js'));
     fs.copyFileSync(
@@ -61,7 +52,6 @@ const build = async (options, watch = false) => {
 (async () => {
     await Promise.all([
         build(jsOptions, isDev),
-        build(cssOptions, isDev),
         copyAssets()
     ]);
 })();
