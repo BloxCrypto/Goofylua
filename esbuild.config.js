@@ -25,7 +25,7 @@ const jsOptions = {
 };
 
 const cssOptions = {
-    entryPoints: ["styleImport.js"],
+    entryPoints: [path.resolve(__dirname, "styleImport.js")],
     bundle: true,
     minify: true,
     sourcemap: isDev,
