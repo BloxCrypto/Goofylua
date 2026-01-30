@@ -3,7 +3,7 @@ import Editor from "./Editor"
 import Request from "./Request"
 import Utils from "./Utils"
 import Client from "./Client"
-import Console from "./Console"
+// Console UI removed — use browser console for logs
 import { CustomEvents } from "./CustomEvents";
 
 const functionButtons = new Map<string, { element: JQuery<any>, func: CategoryFunction }>
@@ -62,7 +62,7 @@ export default {
 
                     Editor.ToggleLoading("Processing")
                     Editor.ToggleReadOnly(true)
-                    Console.log(`applying function '${functionName}'...`)
+                    console.log(`applying function '${functionName}'...`)
 
                     await Request.new(functionName, Utils.CompressData(Editor.GetValue(), false), Client.settings.GetSettings(), Client.session).then(async res => {
                         if (res instanceof Response) {
@@ -74,18 +74,18 @@ export default {
                             if (res.ok) {
                                 _response_body = await res.text()
                                 Client.session = _session
-                                Console.log(`successfully applied function '${functionName}'. (took ${Utils.FormatMs(parseFloat(_mstime))})`, "info");
+                                console.log(`successfully applied function '${functionName}'. (took ${Utils.FormatMs(parseFloat(_mstime))})`);
                                 Editor.SetValue(_response_body)
                             } else {
                                 const responseJSON = await res.json()
-                                Console.log(`${responseJSON.type ? responseJSON.type + ": " : "Error: "}${responseJSON?.error || res.status}`, "error")
+                                console.error(`${responseJSON.type ? responseJSON.type + ": " : "Error: "}${responseJSON?.error || res.status}`)
 
                                 if (responseJSON.type === "SyntaxError") {
                                     Editor.HighlightRange(Editor.SyntaxErrorToRange(responseJSON.error), responseJSON.error)
                                 }
 
                                 if (res.status === 403) {
-                                    Console.log("updating client csrf token...", "warn")
+                                    console.warn("updating client csrf token...")
                                     Client.UpdateCsfrToken()
                                 }
                             }

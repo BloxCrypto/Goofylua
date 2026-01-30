@@ -1,7 +1,6 @@
 import $ from "jquery";
 import { OAuthGetResponse } from "../index"
 import Utils from "./Utils"
-import Console from "./Console";
 import Settings from "./Settings";
 import * as monaco from "monaco-editor"
 
@@ -53,7 +52,7 @@ export default {
             })
         })
 
-        Console.log(`Welcome to GoofyLuaUglifier${this.account ? `, ${this.account.user.username}!` : "!"}`, "info")
+        console.log(`Welcome to GoofyLuaUglifier${this.account ? `, ${this.account.user.username}!` : "!"}`)
         console.log(`Loaded Client (took ${Date.now() - initTime}ms).`)
         $(".content-loading").remove()
     },

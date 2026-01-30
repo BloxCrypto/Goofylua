@@ -75,40 +75,7 @@ function setupUIHandlers() {
         }
     })
 
-    // Console resize
-    const resizeHandle = document.querySelector('.resize-handle') as HTMLElement
-    const consoleContainer = document.querySelector('.console-container') as HTMLElement
-    
-    if (resizeHandle && consoleContainer) {
-        let isResizing = false
-        let startY = 0
-        let startHeight = 0
-
-        resizeHandle.addEventListener('mousedown', (e: MouseEvent) => {
-            isResizing = true
-            startY = e.clientY
-            startHeight = consoleContainer.offsetHeight
-            document.body.style.userSelect = 'none'
-        })
-
-        document.addEventListener('mousemove', (e: MouseEvent) => {
-            if (!isResizing) return
-            const dy = e.clientY - startY
-            const newHeight = Math.max(100, startHeight + dy)
-            consoleContainer.style.height = newHeight + 'px'
-        })
-
-        document.addEventListener('mouseup', () => {
-            isResizing = false
-            document.body.style.userSelect = ''
-        })
-    }
-
-    // Console toggle
-    const consoleToggle = document.getElementById('console-toggle')
-    consoleToggle?.addEventListener('click', () => {
-        consoleContainer?.classList.toggle('minimized')
-    })
+    // Console removed from UI; no resize or toggle handlers needed
 }
 
 function showModal(modalId: string) {
