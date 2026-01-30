@@ -8,8 +8,8 @@ export default class Settings {
     _inputs = new Map<string, JQuery<HTMLInputElement>>()
     _events = new Map<string, CustomEvent>()
 
-    settingsModal = $("#settingsmodal")
-    settingsContent = $("#settingsmodal>.modal-content")
+    settingsModal = $("#settings-modal")
+    settingsContent = $("#settings-modal .settings-grid")
     settingTemplateElement = $(".template-setting")
 
     constructor(
