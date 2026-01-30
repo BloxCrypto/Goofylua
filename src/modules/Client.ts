@@ -104,20 +104,25 @@ export default {
 
     async FetchAccount() {
         if (this.account) return
-        if (Utils.GetCookie("_ASID")) {
-            await fetch(`${this.endpoints.mopsflApi()}oauth/account/get`, { credentials: 'include' }).then(res => res.json()).then(async (res: OAuthGetResponse) => {
-                if (res.code === 403) {
+        try {
+            if (Utils.GetCookie("_ASID")) {
+                const res = await fetch(`${this.endpoints.mopsflApi()}oauth/account/get`, { credentials: 'include' })
+                if (!res.ok) throw new Error(`API responded with status ${res.status}`)
+                const data: OAuthGetResponse = await res.json()
+                if (data.code === 403) {
                     this.ToggleLoginState(false)
-                    $(".sidenav-loading").hide()
-                } else if (res.oauth === "discord") {
-                    this.account = res
-                    this.account.user.avatar = `https://cdn.discordapp.com/avatars/${res.user.id}/${res.user.avatar}`
+                } else if (data.oauth === "discord") {
+                    this.account = data
+                    this.account.user.avatar = `https://cdn.discordapp.com/avatars/${data.user.id}/${data.user.avatar}`
                     this.ToggleLoginState(true)
                 }
-            })
-            $(".sidenav-loading").hide()
-        } else {
+            } else {
+                this.ToggleLoginState(false)
+            }
+        } catch (error) {
+            console.error("Failed to fetch account:", error)
             this.ToggleLoginState(false)
+        } finally {
             $(".sidenav-loading").hide()
         }
     },
