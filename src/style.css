@@ -2,6 +2,10 @@
     scrollbar-width: thin;
 }
 
+template {
+    display: none !important;
+}
+
 ::-webkit-scrollbar {
     width: 20px;
 }
