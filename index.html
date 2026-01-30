@@ -217,9 +217,23 @@
     <template class="template-setting" style="display: none;">
         <div class="setting">
             <span class="setting-name">Setting Name</span>
-            <div class="setting-control">
-                <input type="checkbox" class="filled-in settinginput" id="setting_id" checked="true" />
+
+            <label class="setting-input" id="checkbox">
+                <input type="checkbox" class="filled-in settinginput" id="setting_id" />
                 <span></span>
+            </label>
+
+            <div class="setting-input input-field" id="text">
+                <input placeholder="" id="setting_id" type="text" class="validate settinginput" autocomplete="off">
+            </div>
+
+            <div class="setting-input input-field" id="number">
+                <input placeholder="0" id="setting_id" type="number" class="validate settinginput" autocomplete="off">
+            </div>
+
+            <div class="setting-input input-field" id="dropdown">
+                <select class="settinginput" id="setting_id"></select>
+                <label>Options</label>
             </div>
         </div>
     </template>
