@@ -24,7 +24,18 @@ $(async () => {
 
     Client.Init()
 
-    new M.Modal(document.querySelector(".updateclaimer")).open()
+    // Handle modal overlay
+    const modalOverlay = document.querySelector('.modal-overlay')
+    const updateClaimerModal = document.querySelector('.updateclaimer')
+
+    if (updateClaimerModal && modalOverlay) {
+        const modal = M.Modal.getInstance(updateClaimerModal)
+        if (modal) {
+            modal.options.onOpenStart = () => modalOverlay.classList.add('open')
+            modal.options.onCloseEnd = () => modalOverlay.classList.remove('open')
+        }
+        modal.open()
+    }
 })
 
 $.readyException = (err => {
