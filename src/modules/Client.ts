@@ -2,7 +2,6 @@ import $ from "jquery";
 import { OAuthGetResponse } from "../index"
 import Utils from "./Utils"
 import Settings from "./Settings";
-import * as monaco from "monaco-editor"
 
 const updateItemTemplate = $(".glu-update-item-template"),
     updateList = $("#updates-list")
@@ -154,7 +153,7 @@ export default {
     account: any
     apiToken: string
     session: string
-    editor: monaco.editor.IStandaloneCodeEditor
+    editor: any
     settings: Settings
     endpoints: {
         uglifierApi: () => string

@@ -610,6 +610,15 @@ body {
     cursor: pointer;
 }
 
+/* Editor error highlights */
+.errorCodeHighlightLine {
+    background: rgba(244, 67, 54, 0.08) !important;
+}
+
+.errorCodeHighlightPoint {
+    text-decoration: underline red wavy;
+}
+
 /* Loading States */
 .loading {
     text-align: center;

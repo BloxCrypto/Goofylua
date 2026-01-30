@@ -6,14 +6,7 @@ import Functions from "./modules/Functions";
 import Client from "./modules/Client";
 
 $(async () => {
-    self.MonacoEnvironment = {
-        getWorker(_, label) {
-            console.log(`   > creating web worker '${label}'`)
-            return label === "editorWorkerService"
-                ? new Worker('https://unpkg.com/monaco-editor@0.50.0/esm/vs/editor/editor.worker.js', { type: 'module' })
-                : null
-        }
-    }
+    // Using CodeMirror instead of Monaco — no worker setup required
 
     const settings = new Settings().Init()
     Client.settings = settings
