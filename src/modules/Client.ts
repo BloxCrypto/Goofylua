@@ -123,12 +123,16 @@ export default {
     },
 
     async UpdateCsfrToken() {
-        await fetch(`${this.endpoints.uglifierApi()}ide`, { credentials: "include" }).then(res => res.json()).then(res => {
-            this.apiToken = res.token
-        }).catch(error => {
-            console.error(error)
-            Console.log("unable to update client authentication token! check developer console for more information.", "error")
-        })
+        try {
+            const res = await fetch(`${this.endpoints.uglifierApi()}ide`, { credentials: "include" })
+            if (!res.ok) throw new Error(`API responded with status ${res.status}`)
+            const data = await res.json()
+            this.apiToken = data.token || "guest-token"
+        } catch (error) {
+            console.error("Failed to fetch CSRF token:", error)
+            // Set a fallback token so the app can continue working in offline/dev mode
+            this.apiToken = "guest-token"
+        }
     },
 
     ToggleLoginState(state: boolean) {
