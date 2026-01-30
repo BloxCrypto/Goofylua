@@ -44,7 +44,7 @@ const server = http.createServer((req, res) => {
 
     // Handle API requests
     const path_url = req.url.split('?')[0];
-    if (path_url.startsWith('/api/')) {
+    if (path_url.startsWith('/api/') || path_url.startsWith('/v1/')) {
         res.setHeader('Content-Type', 'application/json');
         const mockResponse = mockResponses[path_url];
 
