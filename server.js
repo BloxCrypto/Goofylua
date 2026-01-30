@@ -20,6 +20,13 @@ const mockResponses = {
                 'Mock API server is running'
             ]
         }
+    },
+    '/v1/oauth/account/get': {
+        code: 403,
+        message: 'Not authenticated'
+    },
+    '/v1/oauth/account/logout': {
+        success: true
     }
 };
 
