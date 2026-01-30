@@ -152,11 +152,6 @@ a:hover {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     z-index: 1000 !important;
-    display: none !important;
-}
-
-.modal.open {
-    display: block !important;
 }
 
 .modal-overlay {
