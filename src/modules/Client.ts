@@ -164,6 +164,7 @@ export default {
 
     Init: () => Promise<void>
     FetchAccount: () => Promise<void>
+    FetchSidenavData: () => Promise<void>
     UpdateCsfrToken: () => Promise<void>
     ToggleLoginState: (state: boolean) => void
 }
