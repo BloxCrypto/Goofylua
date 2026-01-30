@@ -25,44 +25,46 @@ $(async () => {
     Client.Init()
 
     // Handle modal overlay for all modals
-    const modalOverlay = document.querySelector('.modal-overlay')
+    const modalOverlay = document.querySelector('.modal-overlay') as HTMLElement
 
-    // Close all modals initially
-    document.querySelectorAll('.modal').forEach(modalEl => {
-        const modal = M.Modal.getInstance(modalEl)
-        if (modal) {
-            modal.close()
-        }
-    })
-
+    // Wrap modal open/close methods
     if (modalOverlay) {
-        document.querySelectorAll('.modal').forEach(modalEl => {
+        document.querySelectorAll('.modal').forEach((modalEl: HTMLElement) => {
             const modal = M.Modal.getInstance(modalEl)
             if (modal) {
-                const originalOpen = modal.open
-                const originalClose = modal.close
+                const originalOpen = modal.open.bind(modal)
+                const originalClose = modal.close.bind(modal)
 
                 modal.open = function() {
+                    // Close all other modals first
+                    document.querySelectorAll('.modal').forEach((otherModal: HTMLElement) => {
+                        const otherInstance = M.Modal.getInstance(otherModal)
+                        if (otherInstance && otherInstance !== modal) {
+                            otherInstance.close()
+                        }
+                    })
                     modalOverlay.classList.add('open')
-                    originalOpen.call(this)
+                    return originalOpen()
                 }
 
                 modal.close = function() {
                     modalOverlay.classList.remove('open')
-                    originalClose.call(this)
+                    return originalClose()
                 }
             }
         })
     }
 
-    // Open only the update claimer modal
-    const updateClaimerModal = document.querySelector('.updateclaimer')
-    if (updateClaimerModal) {
-        const modal = M.Modal.getInstance(updateClaimerModal)
-        if (modal) {
-            modal.open()
+    // Open the update claimer modal
+    setTimeout(() => {
+        const updateClaimerModal = document.querySelector('.updateclaimer') as HTMLElement
+        if (updateClaimerModal) {
+            const modal = M.Modal.getInstance(updateClaimerModal)
+            if (modal) {
+                modal.open()
+            }
         }
-    }
+    }, 100)
 })
 
 $.readyException = (err => {
