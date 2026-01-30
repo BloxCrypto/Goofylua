@@ -1,12 +1,10 @@
 import $ from "jquery";
 import { OAuthGetResponse } from "../index"
 import Utils from "./Utils"
-import Console from "./Console";
 import Settings from "./Settings";
-import * as monaco from "monaco-editor"
 
 const updateItemTemplate = $(".glu-update-item-template"),
-    updateList = $(".glu-updates")
+    updateList = $("#updates-list")
 
 export default {
     account: null,
@@ -32,35 +30,10 @@ export default {
         await this.UpdateCsfrToken()
         await this.FetchAccount()
 
-        M.Sidenav.getInstance(document.querySelector(".leftmenu-sidebar")).options.onOpenStart = async (e) => {
-            fetch(`${this.endpoints.uglifierApi()}ide/sidenav`, { credentials: "include", headers: { "uglifier-token": this.apiToken } }).then(res => res.json()).then(res => {
-                $("#total_requests").text(res.stats[0] || 0)
-                $("#total_functions_called").text(res.stats[1] || 0)
+        // Fetch sidenav data
+        this.FetchSidenavData()
 
-                Object.keys(res.updatelog).forEach(date => {
-                    const updateData: Array<string> = res.updatelog[date],
-                        item = updateItemTemplate.contents().clone()
-
-                    item.find(".glu-update-date").text(date)
-                    updateData.forEach(updateContent => {
-                        const span = $(document.createElement("span")),
-                            tooltipContent = $(document.createElement("div"))
-
-                        tooltipContent.attr("id", "tooltip-content").html(updateContent).hide()
-                        span.addClass("glu-update-content").addClass("tooltipped")
-                        span.attr("data-tooltip-id", "tooltip-content").attr("data-position", "right")
-
-                        span.html(updateContent).attr("title", updateContent.replace(/\<\/?\w+>/gm, ""))
-                        item.find(".glu-update-content-list").append(span).append(tooltipContent)
-                    })
-
-                    item.appendTo(updateList)
-                })
-
-                updateList.find(".loading").remove()
-            })
-        }
-
+        // Setup account buttons
         $(".account-login").on("click", async () => {
             $(".account-login").attr("disabled", "disabled")
             location.replace(`${this.endpoints.mopsflApi()}oauth/login/discord?r=${location.href}`)
@@ -71,83 +44,107 @@ export default {
             fetch(`${this.endpoints.mopsflApi()}oauth/account/logout`, { credentials: "include" }).then(res => {
                 this.ToggleLoginState(false)
                 $(".account-logout").removeAttr("disabled")
+            }).catch(err => {
+                console.error(err)
+                this.ToggleLoginState(false)
+                $(".account-logout").removeAttr("disabled")
             })
         })
 
-        const consoleDiv = <HTMLDivElement>document.querySelector(".console")
-        document.querySelector(".resize-handle").addEventListener('mousedown', function (e: MouseEvent) {
-            e.preventDefault()
-            consoleDiv.classList.add("border2")
-
-            const startY = e.clientY
-            const startHeight = consoleDiv.offsetHeight
-
-            function onMouseMove(e: MouseEvent) {
-                const dy = e.clientY - startY
-                consoleDiv.style.height = startHeight - dy + 'px'
-            }
-
-            function onMouseUp() {
-                document.removeEventListener('mousemove', onMouseMove)
-                document.removeEventListener('mouseup', onMouseUp)
-                consoleDiv.classList.remove("border2")
-            }
-
-            document.addEventListener('mousemove', onMouseMove)
-            document.addEventListener('mouseup', onMouseUp)
-        })
-
-        Console.log(`Welcome to GoofyLuaUglifier${this.account ? `, ${this.account.user.username}!` : "!"}`, "info")
+        console.log(`Welcome to GoofyLuaUglifier${this.account ? `, ${this.account.user.username}!` : "!"}`)
         console.log(`Loaded Client (took ${Date.now() - initTime}ms).`)
         $(".content-loading").remove()
     },
 
+    async FetchSidenavData() {
+        try {
+            const res = await fetch(`${this.endpoints.uglifierApi()}ide/sidenav`, {
+                credentials: "include",
+                headers: { "uglifier-token": this.apiToken }
+            })
+            if (!res.ok) throw new Error(`API responded with status ${res.status}`)
+            const data = await res.json()
+
+            $("#total_requests").text(data.stats?.[0] || 0)
+            $("#total_functions_called").text(data.stats?.[1] || 0)
+
+            if (data.updatelog) {
+                updateList.find(".loading").remove()
+                Object.keys(data.updatelog).forEach(date => {
+                    const updateData: Array<string> = data.updatelog[date]
+                    const item = updateItemTemplate.contents().clone()
+
+                    item.find(".update-date").text(date)
+                    updateData.forEach(updateContent => {
+                        const span = $(document.createElement("span"))
+                        span.addClass("update-content").text(updateContent)
+                        item.find(".update-content-list").append(span)
+                    })
+
+                    item.appendTo(updateList)
+                })
+            }
+        } catch (error) {
+            console.error("Failed to fetch sidenav data:", error)
+            updateList.find(".loading").text("Failed to load updates")
+        }
+    },
+
     async FetchAccount() {
         if (this.account) return
-        if (Utils.GetCookie("_ASID")) {
-            await fetch(`${this.endpoints.mopsflApi()}oauth/account/get`, { credentials: 'include' }).then(res => res.json()).then(async (res: OAuthGetResponse) => {
-                if (res.code === 403) {
+        try {
+            if (Utils.GetCookie("_ASID")) {
+                const res = await fetch(`${this.endpoints.mopsflApi()}oauth/account/get`, { credentials: 'include' })
+                if (!res.ok) throw new Error(`API responded with status ${res.status}`)
+                const data: OAuthGetResponse = await res.json()
+                if (data.code === 403) {
                     this.ToggleLoginState(false)
-                    $(".sidenav-loading").hide()
-                } else if (res.oauth === "discord") {
-                    this.account = res
-                    this.account.user.avatar = `https://cdn.discordapp.com/avatars/${res.user.id}/${res.user.avatar}`
+                } else if (data.oauth === "discord") {
+                    this.account = data
+                    this.account.user.avatar = `https://cdn.discordapp.com/avatars/${data.user.id}/${data.user.avatar}`
                     this.ToggleLoginState(true)
                 }
-            })
-            $(".sidenav-loading").hide()
-        } else {
+            } else {
+                this.ToggleLoginState(false)
+            }
+        } catch (error) {
+            console.error("Failed to fetch account:", error)
             this.ToggleLoginState(false)
+        } finally {
             $(".sidenav-loading").hide()
         }
     },
 
     async UpdateCsfrToken() {
-        await fetch(`${this.endpoints.uglifierApi()}ide`, { credentials: "include" }).then(res => res.json()).then(res => {
-            this.apiToken = res.token
-        }).catch(error => {
-            console.error(error)
-            Console.log("unable to update client authentication token! check developer console for more information.", "error")
-        })
+        try {
+            const res = await fetch(`${this.endpoints.uglifierApi()}ide`, { credentials: "include" })
+            if (!res.ok) throw new Error(`API responded with status ${res.status}`)
+            const data = await res.json()
+            this.apiToken = data.token || "guest-token"
+        } catch (error) {
+            console.error("Failed to fetch CSRF token:", error)
+            // Set a fallback token so the app can continue working in offline/dev mode
+            this.apiToken = "guest-token"
+        }
     },
 
     ToggleLoginState(state: boolean) {
         if (state === true) {
             $(".account-login").hide()
-            $("#account-information-perms").show()
-            $("#discord-avatar").show()
             $(".account-logout").show()
+            $("#account_username_detail").text(this.account.user.username)
             $("#account_username").text(this.account.user.username)
             $("#account_id").text(this.account.user.id)
-            $("#discord-avatar").attr("src", this.account.user.avatar)
-            $(".account-information-user").css("display", "grid")
+            $("#discord-avatar").attr("src", this.account.user.avatar).show()
+            $("#account-information-perms").text("Logged In")
+                .css("background", this.AccountPermissions.basic.color)
         } else {
             $(".account-logout").hide()
             $(".account-login").show()
+            $("#account_username_detail").text("Not logged in")
             $("#account_username").text("Guest")
-            $("#account_id").text("You are not logged in.")
+            $("#account_id").text("Guest")
             $("#discord-avatar").hide()
-            $(".account-information-user").css("display", "flex")
             $("#account-information-perms").text("Basic")
                 .css("background", this.AccountPermissions.basic.color)
         }
@@ -156,7 +153,7 @@ export default {
     account: any
     apiToken: string
     session: string
-    editor: monaco.editor.IStandaloneCodeEditor
+    editor: any
     settings: Settings
     endpoints: {
         uglifierApi: () => string
@@ -165,6 +162,7 @@ export default {
 
     Init: () => Promise<void>
     FetchAccount: () => Promise<void>
+    FetchSidenavData: () => Promise<void>
     UpdateCsfrToken: () => Promise<void>
     ToggleLoginState: (state: boolean) => void
 }

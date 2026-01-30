@@ -1,6 +1,6 @@
 import Editor from "./Editor";
 import Client from "./Client";
-import Console from "./Console";
+// Console UI removed — using dev console instead
 
 export default {
     async new(func: string, code: string, uglifier_options?: Object, clientSession?: string): Promise<Response> {
@@ -16,7 +16,7 @@ export default {
                 "uglifier-token": Client.apiToken
             }
         }).catch(error => {
-            Console.log(error, "error")
+            console.error(error)
             Editor.ToggleLoading()
             throw error
         })

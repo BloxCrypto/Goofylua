@@ -1,8 +1,9 @@
 import Client from "./Client"
-import * as monaco from "monaco-editor"
+
+declare const CodeMirror: any
 
 export default {
-    errorHighlightCollection: null,
+    errorHighlightHandles: [] as Array<any>,
     defaultScript: `local numA = 123
 local numB = 100
 local messageText = "Hello World!"
@@ -26,20 +27,18 @@ print(numB - numG)`.trim(),
 
     Init() {
         const initTime = Date.now()
-        Client.editor = monaco.editor.create(document.querySelector(".monaco"), {
-            language: "lua",
-            theme: "vs-dark",
-            wordWrap: "on",
-            wordBreak: "normal",
-            automaticLayout: true,
-            maxTokenizationLineLength: 1e5,
-            minimap: { enabled: false },
-            smoothScrolling: true,
-            value: this.defaultScript
+
+        const container = document.querySelector(".monaco") as HTMLElement
+        Client.editor = CodeMirror(container, {
+            value: this.defaultScript,
+            mode: "lua",
+            theme: "monokai",
+            lineNumbers: true,
+            lineWrapping: true,
+            autofocus: false,
         })
 
-        Client.editor.layout()
-        console.log(`Loaded Monaco Editor. (took ${Date.now() - initTime}ms)`);
+        console.log(`Loaded CodeMirror Editor. (took ${Date.now() - initTime}ms)`);
     },
 
     GetValue() {
@@ -59,11 +58,11 @@ print(numB - numG)`.trim(),
     },
 
     ToggleReadOnly(state = true) {
-        Client.editor.updateOptions({ readOnly: state })
+        Client.editor.setOption("readOnly", state)
     },
 
     GetDomElement(): HTMLElement {
-        return Client.editor.getDomNode()
+        return Client.editor.getWrapperElement()
     },
 
     ToggleLoading(loadingText: string = "Loading", noDots?: boolean, html?: boolean) {
@@ -80,22 +79,31 @@ print(numB - numG)`.trim(),
         !html ? loadingTextElement.innerText = `${loadingText}${!noDots ? "..." : ""}` : loadingTextElement.innerHTML = `${loadingText}${!noDots ? "..." : ""}`
     },
 
-    HighlightRange(range: monaco.Range, message: string) {
-        if (!range) return;
+    HighlightRange(range: any, message: string) {
+        if (!range) return
 
-        if (this.errorHighlightCollection) this.errorHighlightCollection.clear()
+        // clear previous highlights
+        if (this.errorHighlightHandles && this.errorHighlightHandles.length) {
+            this.errorHighlightHandles.forEach(h => {
+                try { if (h.mark) h.mark.clear(); } catch (e) { }
+                try { if (h.line != null) Client.editor.removeLineClass(h.line, 'background', 'errorCodeHighlightLine') } catch (e) { }
+            })
+            this.errorHighlightHandles = []
+        }
 
-        this.errorHighlightCollection = Client.editor.createDecorationsCollection([
-            {
-                range: new monaco.Range(range.startLineNumber, 1, range.startLineNumber, range.startColumn + 1),
-                options: {
-                    isWholeLine: true,
-                    className: 'errorCodeHighlightLine',
-                    hoverMessage: { value: message },
-                },
-            },
-            { range, options: { inlineClassName: 'errorCodeHighlightPoint' } },
-        ])
+        const doc = Client.editor.getDoc()
+        const startLine = (range.startLineNumber || range.startLine || 1) - 1
+        const startCh = (range.startColumn || range.startColumn || range.startColumn) ? ((range.startColumn || 1) - 1) : 0
+        const endLine = (range.endLineNumber || range.endLine || startLine + 1) - 1
+        const endCh = (range.endColumn || range.endColumn || startCh + 1) ? ((range.endColumn || (startCh + 1)) - 1) : startCh + 1
+
+        try {
+            const mark = doc.markText({ line: startLine, ch: startCh }, { line: endLine, ch: endCh }, { className: 'errorCodeHighlightPoint', title: message })
+            Client.editor.addLineClass(startLine, 'background', 'errorCodeHighlightLine')
+            this.errorHighlightHandles.push({ mark, line: startLine })
+        } catch (e) {
+            console.error('Failed to highlight range', e)
+        }
     },
 
     SyntaxErrorToRange(error: string) {
@@ -105,10 +113,9 @@ print(numB - numG)`.trim(),
         const line = +match[1]
         let column = +match[2]
 
-        const lineLength = Client.editor.getModel().getLineMaxColumn(line) - 1
-        column = Math.min(column, lineLength)
-        const endCol = column < lineLength ? column + 1 : column
+        // approximate end column as column+1
+        const endCol = column + 1
 
-        return new monaco.Range(line, column, line, endCol + 1)
+        return { startLineNumber: line, startColumn: column, endLineNumber: line, endColumn: endCol }
     }
 }
