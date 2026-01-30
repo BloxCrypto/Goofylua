@@ -24,17 +24,35 @@ $(async () => {
 
     Client.Init()
 
-    // Handle modal overlay
+    // Handle modal overlay for all modals
     const modalOverlay = document.querySelector('.modal-overlay')
-    const updateClaimerModal = document.querySelector('.updateclaimer')
+    if (modalOverlay) {
+        document.querySelectorAll('.modal').forEach(modalEl => {
+            const modal = M.Modal.getInstance(modalEl)
+            if (modal) {
+                const originalOpen = modal.open
+                const originalClose = modal.close
 
-    if (updateClaimerModal && modalOverlay) {
+                modal.open = function() {
+                    modalOverlay.classList.add('open')
+                    originalOpen.call(this)
+                }
+
+                modal.close = function() {
+                    modalOverlay.classList.remove('open')
+                    originalClose.call(this)
+                }
+            }
+        })
+    }
+
+    // Open the update claimer modal
+    const updateClaimerModal = document.querySelector('.updateclaimer')
+    if (updateClaimerModal) {
         const modal = M.Modal.getInstance(updateClaimerModal)
         if (modal) {
-            modal.options.onOpenStart = () => modalOverlay.classList.add('open')
-            modal.options.onCloseEnd = () => modalOverlay.classList.remove('open')
+            modal.open()
         }
-        modal.open()
     }
 })
 
