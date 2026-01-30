@@ -26,6 +26,15 @@ $(async () => {
 
     // Handle modal overlay for all modals
     const modalOverlay = document.querySelector('.modal-overlay')
+
+    // Close all modals initially
+    document.querySelectorAll('.modal').forEach(modalEl => {
+        const modal = M.Modal.getInstance(modalEl)
+        if (modal) {
+            modal.close()
+        }
+    })
+
     if (modalOverlay) {
         document.querySelectorAll('.modal').forEach(modalEl => {
             const modal = M.Modal.getInstance(modalEl)
@@ -46,7 +55,7 @@ $(async () => {
         })
     }
 
-    // Open the update claimer modal
+    // Open only the update claimer modal
     const updateClaimerModal = document.querySelector('.updateclaimer')
     if (updateClaimerModal) {
         const modal = M.Modal.getInstance(updateClaimerModal)
