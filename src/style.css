@@ -175,6 +175,14 @@ a:hover {
     display: block !important;
 }
 
+.updateclaimer {
+    z-index: 1001 !important;
+}
+
+#settingsmodal {
+    display: none !important;
+}
+
 
 .modal-trigger {
     cursor: pointer !important;
