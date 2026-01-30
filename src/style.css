@@ -152,6 +152,8 @@ a:hover {
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     z-index: 1000 !important;
+    max-height: 90vh !important;
+    max-width: 90vw !important;
 }
 
 .modal-overlay {
