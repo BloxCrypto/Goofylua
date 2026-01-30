@@ -13,7 +13,7 @@
     "bundle": "node esbuild.config.js",
     "bundledev": "node esbuild.config.js --dev --watch",
     "build": "rimraf dist && npx tsc && npm run bundle",
-    "dev": "rimraf dist && node server.js & node mock-api.js & npm run bundledev"
+    "dev": "rimraf dist && node server.js & npm run bundledev"
   },
   "name": "goofyluauglifier-client",
   "version": "1.0.0",
