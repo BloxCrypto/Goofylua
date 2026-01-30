@@ -32,35 +32,10 @@ export default {
         await this.UpdateCsfrToken()
         await this.FetchAccount()
 
-        M.Sidenav.getInstance(document.querySelector(".leftmenu-sidebar")).options.onOpenStart = async (e) => {
-            fetch(`${this.endpoints.uglifierApi()}ide/sidenav`, { credentials: "include", headers: { "uglifier-token": this.apiToken } }).then(res => res.json()).then(res => {
-                $("#total_requests").text(res.stats[0] || 0)
-                $("#total_functions_called").text(res.stats[1] || 0)
+        // Fetch sidenav data
+        this.FetchSidenavData()
 
-                Object.keys(res.updatelog).forEach(date => {
-                    const updateData: Array<string> = res.updatelog[date],
-                        item = updateItemTemplate.contents().clone()
-
-                    item.find(".glu-update-date").text(date)
-                    updateData.forEach(updateContent => {
-                        const span = $(document.createElement("span")),
-                            tooltipContent = $(document.createElement("div"))
-
-                        tooltipContent.attr("id", "tooltip-content").html(updateContent).hide()
-                        span.addClass("glu-update-content").addClass("tooltipped")
-                        span.attr("data-tooltip-id", "tooltip-content").attr("data-position", "right")
-
-                        span.html(updateContent).attr("title", updateContent.replace(/\<\/?\w+>/gm, ""))
-                        item.find(".glu-update-content-list").append(span).append(tooltipContent)
-                    })
-
-                    item.appendTo(updateList)
-                })
-
-                updateList.find(".loading").remove()
-            })
-        }
-
+        // Setup account buttons
         $(".account-login").on("click", async () => {
             $(".account-login").attr("disabled", "disabled")
             location.replace(`${this.endpoints.mopsflApi()}oauth/login/discord?r=${location.href}`)
@@ -71,35 +46,50 @@ export default {
             fetch(`${this.endpoints.mopsflApi()}oauth/account/logout`, { credentials: "include" }).then(res => {
                 this.ToggleLoginState(false)
                 $(".account-logout").removeAttr("disabled")
+            }).catch(err => {
+                console.error(err)
+                this.ToggleLoginState(false)
+                $(".account-logout").removeAttr("disabled")
             })
-        })
-
-        const consoleDiv = <HTMLDivElement>document.querySelector(".console")
-        document.querySelector(".resize-handle").addEventListener('mousedown', function (e: MouseEvent) {
-            e.preventDefault()
-            consoleDiv.classList.add("border2")
-
-            const startY = e.clientY
-            const startHeight = consoleDiv.offsetHeight
-
-            function onMouseMove(e: MouseEvent) {
-                const dy = e.clientY - startY
-                consoleDiv.style.height = startHeight - dy + 'px'
-            }
-
-            function onMouseUp() {
-                document.removeEventListener('mousemove', onMouseMove)
-                document.removeEventListener('mouseup', onMouseUp)
-                consoleDiv.classList.remove("border2")
-            }
-
-            document.addEventListener('mousemove', onMouseMove)
-            document.addEventListener('mouseup', onMouseUp)
         })
 
         Console.log(`Welcome to GoofyLuaUglifier${this.account ? `, ${this.account.user.username}!` : "!"}`, "info")
         console.log(`Loaded Client (took ${Date.now() - initTime}ms).`)
         $(".content-loading").remove()
+    },
+
+    async FetchSidenavData() {
+        try {
+            const res = await fetch(`${this.endpoints.uglifierApi()}ide/sidenav`, {
+                credentials: "include",
+                headers: { "uglifier-token": this.apiToken }
+            })
+            if (!res.ok) throw new Error(`API responded with status ${res.status}`)
+            const data = await res.json()
+
+            $("#total_requests").text(data.stats?.[0] || 0)
+            $("#total_functions_called").text(data.stats?.[1] || 0)
+
+            if (data.updatelog) {
+                updateList.find(".loading").remove()
+                Object.keys(data.updatelog).forEach(date => {
+                    const updateData: Array<string> = data.updatelog[date]
+                    const item = updateItemTemplate.contents().clone()
+
+                    item.find(".update-date").text(date)
+                    updateData.forEach(updateContent => {
+                        const span = $(document.createElement("span"))
+                        span.addClass("update-content").text(updateContent)
+                        item.find(".update-content-list").append(span)
+                    })
+
+                    item.appendTo(updateList)
+                })
+            }
+        } catch (error) {
+            console.error("Failed to fetch sidenav data:", error)
+            updateList.find(".loading").text("Failed to load updates")
+        }
     },
 
     async FetchAccount() {
