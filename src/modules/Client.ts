@@ -133,20 +133,20 @@ export default {
     ToggleLoginState(state: boolean) {
         if (state === true) {
             $(".account-login").hide()
-            $("#account-information-perms").show()
-            $("#discord-avatar").show()
             $(".account-logout").show()
+            $("#account_username_detail").text(this.account.user.username)
             $("#account_username").text(this.account.user.username)
             $("#account_id").text(this.account.user.id)
-            $("#discord-avatar").attr("src", this.account.user.avatar)
-            $(".account-information-user").css("display", "grid")
+            $("#discord-avatar").attr("src", this.account.user.avatar).show()
+            $("#account-information-perms").text("Logged In")
+                .css("background", this.AccountPermissions.basic.color)
         } else {
             $(".account-logout").hide()
             $(".account-login").show()
+            $("#account_username_detail").text("Not logged in")
             $("#account_username").text("Guest")
-            $("#account_id").text("You are not logged in.")
+            $("#account_id").text("Guest")
             $("#discord-avatar").hide()
-            $(".account-information-user").css("display", "flex")
             $("#account-information-perms").text("Basic")
                 .css("background", this.AccountPermissions.basic.color)
         }
