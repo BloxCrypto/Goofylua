@@ -147,6 +147,31 @@ a:hover {
 .modal {
     --modal-border-radius: 5px !important;
     padding-bottom: 5px !important;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 1000 !important;
+    display: none !important;
+}
+
+.modal.open {
+    display: block !important;
+}
+
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 999 !important;
+    display: none !important;
+}
+
+.modal-overlay.open {
+    display: block !important;
 }
 
 
