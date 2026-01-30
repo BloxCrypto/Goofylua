@@ -6,7 +6,7 @@ import Settings from "./Settings";
 import * as monaco from "monaco-editor"
 
 const updateItemTemplate = $(".glu-update-item-template"),
-    updateList = $(".glu-updates")
+    updateList = $("#updates-list")
 
 export default {
     account: null,
