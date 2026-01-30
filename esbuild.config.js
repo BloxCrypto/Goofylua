@@ -20,7 +20,7 @@ const jsOptions = {
     format: 'esm',
     minify: true,
     sourcemap: isDev,
-    loader: { '.ts': 'ts', '.tsx': 'tsx', ...assetLoader },
+    loader: { '.ts': 'ts', '.tsx': 'tsx', '.css': 'css', ...assetLoader },
     logLevel: isDev ? 'info' : 'error',
 };
 
@@ -31,10 +31,7 @@ const copyAssets = async () => {
         'dist/js/materialize.min.js'
     )
 
-    await fse.copy(
-        'node_modules/monaco-editor/esm/vs',
-        'dist/js/monaco-editor/vs'
-    )
+    // Removed copying monaco-editor to use CDN instead
 };
 
 const build = async (options, watch = false) => {
@@ -50,8 +47,13 @@ const build = async (options, watch = false) => {
 };
 
 (async () => {
-    await Promise.all([
-        build(jsOptions, isDev),
-        copyAssets()
-    ]);
+    try {
+        await Promise.all([
+            build(jsOptions, isDev),
+            copyAssets()
+        ]);
+    } catch (error) {
+        console.error('Build failed:', error);
+        process.exit(1);
+    }
 })();

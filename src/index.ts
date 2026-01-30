@@ -10,7 +10,7 @@ $(async () => {
         getWorker(_, label) {
             console.log(`   > creating web worker '${label}'`)
             return label === "editorWorkerService"
-                ? new Worker(new URL('monaco-editor/vs/editor/editor.worker.js', import.meta.url), { type: 'module' })
+                ? new Worker('https://unpkg.com/monaco-editor@0.50.0/esm/vs/editor/editor.worker.js', { type: 'module' })
                 : null
         }
     }
