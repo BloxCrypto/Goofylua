@@ -749,9 +749,71 @@ body {
 
     .modal {
         max-width: 90vw;
+        max-height: 95vh;
+        width: 95%;
+    }
+
+    .modal-body {
+        max-height: calc(95vh - 200px);
+        overflow-y: auto;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+
+    .setting {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        width: 100%;
+    }
+
+    .setting-name {
+        width: 100%;
+    }
+
+    .setting-control {
+        width: 100%;
     }
 
     .account-info {
         display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal {
+        max-width: 95vw;
+        max-height: 90vh;
+    }
+
+    .modal-body {
+        max-height: calc(90vh - 200px);
+        padding: var(--spacing-md);
+    }
+
+    .modal-header {
+        padding: var(--spacing-md);
+    }
+
+    .modal-footer {
+        padding: var(--spacing-md);
+        flex-direction: column;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .settings-grid {
+        gap: var(--spacing-sm);
+    }
+
+    .setting {
+        padding: var(--spacing-sm);
     }
 }
