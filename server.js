@@ -42,6 +42,13 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // Handle favicon requests
+    if (req.url === '/favicon.ico') {
+        res.writeHead(404);
+        res.end();
+        return;
+    }
+
     // Handle API requests
     const path_url = req.url.split('?')[0];
     if (path_url.startsWith('/api/') || path_url.startsWith('/v1/')) {
