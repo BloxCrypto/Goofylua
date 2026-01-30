@@ -80,9 +80,8 @@ export default class Settings {
         })
 
 
-        $(".settings-open").on("click", () => {
-            new M.Modal(document.querySelector("#settingsmodal")).open()
-        })
+        // Settings button is now handled in index.ts
+        // No need to create modal here
 
         $("#resetdefault").on("click", () => {
             Object.keys(this.defaultSettings).forEach(key => {
