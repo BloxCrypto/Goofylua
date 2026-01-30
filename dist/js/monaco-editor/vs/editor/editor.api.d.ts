@@ -6225,7 +6225,6 @@ export namespace editor {
     //compatibility:
     export type IReadOnlyModel = ITextModel;
     export type IModel = ITextModel;
-    export const CodeEditor: ICodeEditor;
 }
 
 export namespace languages {

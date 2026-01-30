@@ -1,4 +1,5 @@
 import $ from "jquery";
+import "./style.css";
 import Editor from "./modules/Editor";
 import Settings from "./modules/Settings";
 import Functions from "./modules/Functions";
