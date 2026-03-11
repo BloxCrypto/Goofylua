@@ -17,7 +17,7 @@ const jsOptions = {
     entryPoints: ['./src/index.ts'],
     bundle: true,
     outdir: 'dist/js',
-    format: 'esm',
+    format: 'iife',
     minify: true,
     sourcemap: isDev,
     loader: { '.ts': 'ts', '.tsx': 'tsx', '.css': 'css', ...assetLoader },
